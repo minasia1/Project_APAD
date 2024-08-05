@@ -2,17 +2,28 @@
 from bson.objectid import ObjectId
 from flask import Flask, request, jsonify
 from pymongo import MongoClient
+from flask_cors import CORS
+import projectsDatabase
 
 # Import custom modules for database interactions
-import usersDB
-import projectsDB
-import hardwareDB
+#import usersDB
+#import projectsDB
+#import hardwareDB
 
 # Define the MongoDB connection string
-MONGODB_SERVER = "your_mongodb_connection_string_here"
+#MONGODB_SERVER = "your_mongodb_connection_string_here"
+client = MongoClient('mongodb+srv://admin:123admin456@cluster0.fxjtzjv.mongodb.net/')
+db = client['apad']
+db_project = db['project']
+db_hardware = db['hardwareset']
 
 # Initialize a new Flask web application
 app = Flask(__name__)
+CORS(app)
+
+@app.route("/")
+def welcome():
+    return "<p>Welcome to flask!</p>"
 
 # Route for user login
 @app.route('/login', methods=['POST'])
@@ -27,6 +38,41 @@ def login():
 
     # Return a JSON response
     return jsonify({})
+
+@app.route("/create_project3", methods=['POST'])
+def welcome2():
+    return {"message":"A"}
+
+@app.route("/bonnie")
+def bonnie():
+    
+    message = "aca llega"
+    try:
+        project = db_project.find_one({'projectId': "P02"})
+        message = message + " x2" 
+        if project:
+            message = message + " x3" 
+            return project
+            message = message + " x4" 
+    except:
+        message = message + " x5" 
+        return jsonify({"mensaje": message})
+
+@app.route('/create_project', methods=['POST'])
+def create_project():
+    data = request.get_json()
+
+    if not all(key in data for key in ('name', 'description', 'projectId')):
+        return jsonify({'error': 'Missing required fields'}), 400
+
+    name =  data['name']
+    projectId = data['projectId']
+    description = data['description']
+    user = 'abc' #replace with the current user
+
+    result = projectsDatabase.createProject(db_project, name, projectId, description, user)
+
+    return result
 
 # Route for the main page (Work in progress)
 @app.route('/main')
@@ -78,20 +124,6 @@ def get_user_projects_list():
     # Connect to MongoDB
 
     # Fetch the user's projects using the usersDB module
-
-    # Close the MongoDB connection
-
-    # Return a JSON response
-    return jsonify({})
-
-# Route for creating a new project
-@app.route('/create_project', methods=['POST'])
-def create_project():
-    # Extract data from request
-
-    # Connect to MongoDB
-
-    # Attempt to create the project using the projectsDB module
 
     # Close the MongoDB connection
 
